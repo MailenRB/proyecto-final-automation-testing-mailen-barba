@@ -16,10 +16,15 @@ class CartPage(BasePage):
             return []
 
     def remove_product_from_cart(self, product_name):
-        """Removes a specific product from the cart by its name."""
+        """Removes a specific product from the cart by its name and waits for it to disappear."""
         btn_xpath = f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']/ancestor::div[contains(@class, 'cart_item')]//button"
         self.click((By.XPATH, btn_xpath))
+        
+        # Wait until the removed item is no longer present/visible in the DOM
+        from selenium.webdriver.support import expected_conditions as EC
+        item_xpath = f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']"
+        self.wait.until(EC.invisibility_of_element_located((By.XPATH, item_xpath)))
 
     def go_to_checkout(self):
         """Clicks the checkout button to proceed to the checkout form."""
-        self.click(self.checkout_button)
+        self.js_click(self.checkout_button)

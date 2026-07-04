@@ -27,7 +27,7 @@ class InventoryPage(BasePage):
 
     def go_to_cart(self):
         """Navigates to the shopping cart page."""
-        self.click(self.cart_link)
+        self.js_click(self.cart_link)
 
     def sort_products_by(self, option_value):
         """
