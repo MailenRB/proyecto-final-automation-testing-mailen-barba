@@ -16,11 +16,11 @@ class CheckoutPage(BasePage):
         self.send_keys(self.first_name_input, first_name)
         self.send_keys(self.last_name_input, last_name)
         self.send_keys(self.postal_code_input, postal_code)
-        self.click(self.continue_button)
+        self.js_click_and_wait_for_url(self.continue_button, "checkout-step-two")
 
     def finish_checkout(self):
         """Clicks the finish button on the overview page."""
-        self.js_click(self.finish_button)
+        self.js_click_and_wait_for_url(self.finish_button, "checkout-complete")
 
     def get_complete_header_text(self):
         """Retrieves the completion header text (e.g., 'Thank you for your order!')."""

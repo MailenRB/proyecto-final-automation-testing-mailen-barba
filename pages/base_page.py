@@ -1,5 +1,6 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from utils.logger import get_logger
 
 class BasePage:
@@ -30,6 +31,30 @@ class BasePage:
         self.logger.info(f"JS Clicking element: {locator}")
         element = self.wait.until(EC.element_to_be_clickable(locator))
         self.driver.execute_script("arguments[0].click();", element)
+
+    def js_click_and_wait_for_url(self, locator, url_fragment, attempts=3):
+        """JS-clicks an element and confirms the page actually navigated.
+
+        On SauceDemo's submit controls a click can intermittently fail to fire in
+        headless CI (the handler never runs, so the page stays put with no error).
+        Re-clicking until the URL advances makes the step transition reliable and
+        fails with a clear message instead of a downstream timeout.
+        """
+        for attempt in range(1, attempts + 1):
+            if url_fragment in self.driver.current_url:
+                return
+            self.js_click(locator)
+            try:
+                self.wait.until(EC.url_contains(url_fragment))
+                return
+            except TimeoutException:
+                self.logger.warning(
+                    f"URL did not reach '{url_fragment}' after click "
+                    f"(attempt {attempt}/{attempts}); retrying"
+                )
+        raise TimeoutException(
+            f"Page did not navigate to '{url_fragment}' after {attempts} clicks on {locator}"
+        )
 
     def _set_react_input_value(self, element, text):
         """Sets a value on a controlled (React) input via the native setter.
