@@ -12,12 +12,12 @@ class InventoryPage(BasePage):
     def add_product_to_cart(self, product_name):
         """Adds a specific product to the cart by its visible name."""
         btn_xpath = f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']/ancestor::div[contains(@class, 'inventory_item')]//button"
-        self.click((By.XPATH, btn_xpath))
+        self.js_click((By.XPATH, btn_xpath))
 
     def remove_product_from_inventory(self, product_name):
         """Removes a specific product from the inventory page by its visible name."""
         btn_xpath = f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']/ancestor::div[contains(@class, 'inventory_item')]//button"
-        self.click((By.XPATH, btn_xpath))
+        self.js_click((By.XPATH, btn_xpath))
 
     def get_cart_badge_count(self):
         """Gets the current number of items displayed in the shopping cart badge."""
@@ -27,7 +27,7 @@ class InventoryPage(BasePage):
 
     def go_to_cart(self):
         """Navigates to the shopping cart page."""
-        self.click(self.cart_link)
+        self.js_click(self.cart_link)
 
     def sort_products_by(self, option_value):
         """
