@@ -31,15 +31,33 @@ class BasePage:
         element = self.wait.until(EC.element_to_be_clickable(locator))
         self.driver.execute_script("arguments[0].click();", element)
 
-    def send_keys(self, locator, text):
-        """Clears and types text into an element, verifying the value persisted.
+    def _set_react_input_value(self, element, text):
+        """Sets a value on a controlled (React) input via the native setter.
 
-        On SPA (React) controlled inputs reached via client-side navigation,
-        keystrokes sent before the component finishes rendering can be silently
-        dropped. This left the checkout form empty in headless CI and made the
-        'Continue' validation fail ('First Name is required'), so the flow never
-        reached the overview step. We wait until the field is interactable, then
-        confirm the value stuck and retry if it did not.
+        On headless CI the synthetic key events from ``send_keys`` are dropped by
+        SauceDemo's checkout inputs, so the field stays empty. Assigning through
+        the prototype's native value setter and dispatching an ``input`` event is
+        the reliable way to make React register the change in its own state,
+        which is what the form validation actually reads.
+        """
+        self.driver.execute_script(
+            "const el = arguments[0], val = arguments[1];"
+            "const setter = Object.getOwnPropertyDescriptor("
+            "window.HTMLInputElement.prototype, 'value').set;"
+            "setter.call(el, val);"
+            "el.dispatchEvent(new Event('input', { bubbles: true }));"
+            "el.dispatchEvent(new Event('change', { bubbles: true }));",
+            element, text,
+        )
+
+    def send_keys(self, locator, text):
+        """Types text into an element and guarantees the value actually persisted.
+
+        Tries native typing first (realistic path). If the value does not stick
+        -- which happens on SauceDemo's React checkout inputs in headless CI,
+        where key events are silently dropped and the form submits empty
+        ('First Name is required') -- it falls back to setting the value through
+        React's controlled-input mechanism, then verifies and retries.
         """
         is_secret = "password" in str(locator).lower() or "password" in text.lower()
         if is_secret:
@@ -52,6 +70,9 @@ class BasePage:
             element = self.wait.until(EC.element_to_be_clickable(locator))
             element.clear()
             element.send_keys(text)
+            if element.get_attribute("value") != text:
+                # Native keystrokes were dropped -> drive the value through React.
+                self._set_react_input_value(element, text)
             if element.get_attribute("value") == text:
                 return
             self.logger.warning(
