@@ -5,55 +5,55 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 def pytest_addoption(parser):
-    parser.addoption("--headless", action="store_true", default=False, help="run tests in headless mode")
+    parser.addoption("--headless", action="store_true", default=False, help="ejecuta las pruebas en modo headless (sin cabezal)")
 
 @pytest.fixture(scope="function")
 def driver(request):
-    headless = request.config.getoption("--headless")
-    chrome_options = Options()
-    if headless:
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+    sin_cabezal = request.config.getoption("--headless")
+    opciones_chrome = Options()
+    if sin_cabezal:
+        opciones_chrome.add_argument("--headless")
+        opciones_chrome.add_argument("--disable-gpu")
+        opciones_chrome.add_argument("--window-size=1920,1080")
+        opciones_chrome.add_argument("--no-sandbox")
+        opciones_chrome.add_argument("--disable-dev-shm-usage")
     
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(options=opciones_chrome)
     driver.maximize_window()
     yield driver
     driver.quit()
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    outcome = yield
-    rep = outcome.get_result()
+    resultado = yield
+    reporte = resultado.get_result()
     
-    if rep.when == "call" and rep.failed:
+    if reporte.when == "call" and reporte.failed:
         if "driver" in item.fixturenames:
-            web_driver = item.funcargs["driver"]
-            # Create reports and screenshots directory
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-            reports_dir = os.path.join(base_dir, "reports")
-            screenshots_dir = os.path.join(reports_dir, "screenshots")
-            os.makedirs(screenshots_dir, exist_ok=True)
+            controlador_web = item.funcargs["driver"]
+            # Crear directorio de reportes y capturas de pantalla
+            dir_base = os.path.dirname(os.path.abspath(__file__))
+            dir_reportes = os.path.join(dir_base, "reports")
+            dir_capturas = os.path.join(dir_reportes, "screenshots")
+            os.makedirs(dir_capturas, exist_ok=True)
             
-            now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            test_name = item.name
-            file_name = f"{test_name}_{now}.png"
-            file_path = os.path.join(screenshots_dir, file_name)
+            ahora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            nombre_prueba = item.name
+            nombre_archivo = f"{nombre_prueba}_{ahora}.png"
+            ruta_archivo = os.path.join(dir_capturas, nombre_archivo)
             
-            web_driver.save_screenshot(file_path)
+            controlador_web.save_screenshot(ruta_archivo)
             
-            # Embed in Pytest HTML Report
-            extra = getattr(rep, "extra", [])
-            relative_path = f"screenshots/{file_name}"
+            # Incrustar en el Reporte HTML de Pytest
+            extra = getattr(reporte, "extra", [])
+            ruta_relativa = f"screenshots/{nombre_archivo}"
             
             try:
                 import pytest_html
-                extra.append(pytest_html.extras.image(relative_path))
+                extra.append(pytest_html.extras.image(ruta_relativa))
             except Exception:
-                # Direct HTML tag fallback
-                html = f'<div><img src="{relative_path}" alt="screenshot" style="width:300px;height:225px;" onclick="window.open(this.src)" align="right"/></div>'
+                # Alternativa directa con etiqueta HTML
+                html = f'<div><img src="{ruta_relativa}" alt="captura" style="width:300px;height:225px;" onclick="window.open(this.src)" align="right"/></div>'
                 extra.append(html)
             
-            rep.extra = extra
+            reporte.extra = extra

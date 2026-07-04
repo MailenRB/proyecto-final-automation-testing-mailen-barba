@@ -1,36 +1,36 @@
 import logging
 import os
 
-def get_logger(name):
+def obtener_logger(nombre):
     """
-    Creates or retrieves a logger configured to write to console and a file.
+    Crea u obtiene un logger configurado para escribir en la consola y en un archivo.
     """
-    logger = logging.getLogger(name)
-    # Prevent duplicate handlers if the logger is retrieved multiple times
+    logger = logging.getLogger(nombre)
+    # Previene manejadores duplicados si el logger se obtiene múltiples veces
     if not logger.handlers:
         logger.setLevel(logging.INFO)
         
-        # Dynamically resolve the logs directory relative to this utility's location
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        logs_dir = os.path.join(current_dir, "..", "logs")
-        os.makedirs(logs_dir, exist_ok=True)
+        # Resuelve dinámicamente el directorio de logs relativo a la ubicación de esta utilidad
+        dir_actual = os.path.dirname(os.path.abspath(__file__))
+        dir_logs = os.path.join(dir_actual, "..", "logs")
+        os.makedirs(dir_logs, exist_ok=True)
         
-        log_file = os.path.join(logs_dir, "execution.log")
+        archivo_log = os.path.join(dir_logs, "execution.log")
         
-        # Formatting pattern
-        formatter = logging.Formatter(
+        # Patrón de formateo
+        formateador = logging.Formatter(
             fmt='%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         
-        # File handler for local logs persistency
-        file_handler = logging.FileHandler(log_file, encoding='utf-8')
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        # Manejador de archivo para persistencia de logs locales
+        manejador_archivo = logging.FileHandler(archivo_log, encoding='utf-8')
+        manejador_archivo.setFormatter(formateador)
+        logger.addHandler(manejador_archivo)
         
-        # Console handler to output logs to test runners
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
+        # Manejador de consola para enviar logs a los ejecutores de pruebas
+        manejador_consola = logging.StreamHandler()
+        manejador_consola.setFormatter(formateador)
+        logger.addHandler(manejador_consola)
         
     return logger

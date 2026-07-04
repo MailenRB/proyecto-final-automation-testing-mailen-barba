@@ -1,27 +1,27 @@
 from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
 
-class CheckoutPage(BasePage):
+class PaginaCheckout(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
-        self.first_name_input = (By.ID, "first-name")
-        self.last_name_input = (By.ID, "last-name")
-        self.postal_code_input = (By.ID, "postal-code")
-        self.continue_button = (By.ID, "continue")
-        self.finish_button = (By.ID, "finish")
-        self.complete_header = (By.CSS_SELECTOR, ".complete-header")
+        self.input_nombre = (By.ID, "first-name")
+        self.input_apellido = (By.ID, "last-name")
+        self.input_codigo_postal = (By.ID, "postal-code")
+        self.boton_continuar = (By.ID, "continue")
+        self.boton_finalizar = (By.ID, "finish")
+        self.encabezado_completo = (By.CSS_SELECTOR, ".complete-header")
 
-    def fill_checkout_info(self, first_name, last_name, postal_code):
-        """Fills the checkout information form and submits it."""
-        self.send_keys(self.first_name_input, first_name)
-        self.send_keys(self.last_name_input, last_name)
-        self.send_keys(self.postal_code_input, postal_code)
-        self.js_click_and_wait_for_url(self.continue_button, "checkout-step-two")
+    def completar_info_checkout(self, nombre, apellido, codigo_postal):
+        """Completa el formulario de información de pago (checkout) y lo envía."""
+        self.escribir_texto(self.input_nombre, nombre)
+        self.escribir_texto(self.input_apellido, apellido)
+        self.escribir_texto(self.input_codigo_postal, codigo_postal)
+        self.hacer_clic_js_y_esperar_url(self.boton_continuar, "checkout-step-two")
 
-    def finish_checkout(self):
-        """Clicks the finish button on the overview page."""
-        self.js_click_and_wait_for_url(self.finish_button, "checkout-complete")
+    def finalizar_checkout(self):
+        """Hace clic en el botón de finalizar en la página de resumen de compra."""
+        self.hacer_clic_js_y_esperar_url(self.boton_finalizar, "checkout-complete")
 
-    def get_complete_header_text(self):
-        """Retrieves the completion header text (e.g., 'Thank you for your order!')."""
-        return self.get_text(self.complete_header)
+    def obtener_texto_encabezado_completo(self):
+        """Recupera el texto del encabezado de finalización (por ejemplo, 'Thank you for your order!')."""
+        return self.obtener_texto(self.encabezado_completo)

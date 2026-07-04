@@ -1,30 +1,30 @@
 from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
 
-class CartPage(BasePage):
+class PaginaCarrito(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
-        self.checkout_button = (By.ID, "checkout")
-        self.cart_item_name = (By.CSS_SELECTOR, ".inventory_item_name")
+        self.boton_checkout = (By.ID, "checkout")
+        self.nombre_item_carrito = (By.CSS_SELECTOR, ".inventory_item_name")
 
-    def get_cart_item_names(self):
-        """Retrieves names of all products currently in the cart without waiting."""
+    def obtener_nombres_items_carrito(self):
+        """Recupera los nombres de todos los productos actualmente en el carrito sin esperar."""
         try:
-            elements = self.driver.find_elements(*self.cart_item_name)
-            return [el.text for el in elements]
+            elementos = self.driver.find_elements(*self.nombre_item_carrito)
+            return [el.text for el in elementos]
         except Exception:
             return []
 
-    def remove_product_from_cart(self, product_name):
-        """Removes a specific product from the cart by its name and waits for it to disappear."""
-        btn_xpath = f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']/ancestor::div[contains(@class, 'cart_item')]//button"
-        self.js_click((By.XPATH, btn_xpath))
+    def eliminar_producto_del_carrito(self, nombre_producto):
+        """Elimina un producto específico del carrito por su nombre y espera a que desaparezca."""
+        xpath_boton = f"//div[contains(@class, 'inventory_item_name') and text()='{nombre_producto}']/ancestor::div[contains(@class, 'cart_item')]//button"
+        self.hacer_clic_js((By.XPATH, xpath_boton))
         
-        # Wait until the removed item is no longer present/visible in the DOM
+        # Espera hasta que el elemento eliminado ya no esté presente/visible en el DOM
         from selenium.webdriver.support import expected_conditions as EC
-        item_xpath = f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']"
-        self.wait.until(EC.invisibility_of_element_located((By.XPATH, item_xpath)))
+        xpath_item = f"//div[contains(@class, 'inventory_item_name') and text()='{nombre_producto}']"
+        self.wait.until(EC.invisibility_of_element_located((By.XPATH, xpath_item)))
 
-    def go_to_checkout(self):
-        """Clicks the checkout button to proceed to the checkout form."""
-        self.js_click(self.checkout_button)
+    def ir_a_checkout(self):
+        """Hace clic en el botón de checkout para proceder al formulario de pago."""
+        self.hacer_clic_js(self.boton_checkout)

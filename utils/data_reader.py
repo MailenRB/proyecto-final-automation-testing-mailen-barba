@@ -1,11 +1,11 @@
 import json
 import os
 
-def load_json_data(filename="test_data.json"):
+def cargar_datos_json(nombre_archivo="test_data.json"):
     """
-    Loads JSON data from the data/ directory.
+    Carga datos JSON desde el directorio data/.
     """
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, "..", "data", filename)
-    with open(file_path, "r", encoding="utf-8") as f:
+    dir_actual = os.path.dirname(os.path.abspath(__file__))
+    ruta_archivo = os.path.join(dir_actual, "..", "data", nombre_archivo)
+    with open(ruta_archivo, "r", encoding="utf-8") as f:
         return json.load(f)

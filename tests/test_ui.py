@@ -1,127 +1,127 @@
 import pytest
-from utils.data_reader import load_json_data
-from utils.logger import get_logger
-from pages.login_page import LoginPage
-from pages.inventory_page import InventoryPage
-from pages.cart_page import CartPage
-from pages.checkout_page import CheckoutPage
+from utils.data_reader import cargar_datos_json
+from utils.logger import obtener_logger
+from pages.login_page import PaginaLogin
+from pages.inventory_page import PaginaInventario
+from pages.cart_page import PaginaCarrito
+from pages.checkout_page import PaginaCheckout
 
-# Set up UI logger
-logger = get_logger("UI_Tests")
+# Configurar logger de UI
+logger = obtener_logger("Pruebas_UI")
 
-# Load test data once for the module
-data = load_json_data()
+# Cargar datos de prueba una vez para el módulo
+datos = cargar_datos_json()
 
-def test_login_success(driver):
-    """Test 1: Verification of successful login."""
-    logger.info("--- STARTING TEST: test_login_success ---")
-    login_page = LoginPage(driver)
+def test_inicio_sesion_exitoso(driver):
+    """Prueba 1: Verificación de inicio de sesión exitoso."""
+    logger.info("--- INICIANDO PRUEBA: test_inicio_sesion_exitoso ---")
+    pagina_login = PaginaLogin(driver)
     
-    logger.info(f"Navigating to {data['url']}")
-    driver.get(data["url"])
+    logger.info(f"Navegando a {datos['url']}")
+    driver.get(datos["url"])
     
-    logger.info(f"Logging in with user: '{data['valid_user']['username']}'")
-    login_page.login(data["valid_user"]["username"], data["valid_user"]["password"])
+    logger.info(f"Iniciando sesión con el usuario: '{datos['valid_user']['username']}'")
+    pagina_login.iniciar_sesion(datos["valid_user"]["username"], datos["valid_user"]["password"])
     
-    logger.info("Verifying redirection to inventory.html")
+    logger.info("Verificando redirección a inventory.html")
     assert "inventory.html" in driver.current_url
-    logger.info("--- TEST PASSED: test_login_success ---")
+    logger.info("--- PRUEBA EXITOSA: test_inicio_sesion_exitoso ---")
 
-def test_login_failure(driver):
-    """Test 2: Escenario negativo - Login con credenciales invalidas."""
-    logger.info("--- STARTING TEST: test_login_failure ---")
-    login_page = LoginPage(driver)
+def test_inicio_sesion_fallido(driver):
+    """Prueba 2: Escenario negativo - Inicio de sesión con credenciales inválidas."""
+    logger.info("--- INICIANDO PRUEBA: test_inicio_sesion_fallido ---")
+    pagina_login = PaginaLogin(driver)
     
-    logger.info(f"Navigating to {data['url']}")
-    driver.get(data["url"])
+    logger.info(f"Navegando a {datos['url']}")
+    driver.get(datos["url"])
     
-    logger.info(f"Logging in with invalid user: '{data['invalid_user']['username']}'")
-    login_page.login(data["invalid_user"]["username"], data["invalid_user"]["password"])
+    logger.info(f"Iniciando sesión con el usuario inválido: '{datos['invalid_user']['username']}'")
+    pagina_login.iniciar_sesion(datos["invalid_user"]["username"], datos["invalid_user"]["password"])
     
-    logger.info("Verifying error message container matches expected text")
-    error_msg = login_page.get_error_message()
-    assert "Username and password do not match" in error_msg
-    logger.info("--- TEST PASSED: test_login_failure ---")
+    logger.info("Verificando que el contenedor del mensaje de error coincida con el texto esperado")
+    mensaje_error = pagina_login.obtener_mensaje_error()
+    assert "Username and password do not match" in mensaje_error
+    logger.info("--- PRUEBA EXITOSA: test_inicio_sesion_fallido ---")
 
-def test_add_to_cart(driver):
-    """Test 3: Agregar productos al carrito y verificar contenido."""
-    logger.info("--- STARTING TEST: test_add_to_cart ---")
-    login_page = LoginPage(driver)
-    inventory_page = InventoryPage(driver)
-    cart_page = CartPage(driver)
+def test_agregar_al_carrito(driver):
+    """Prueba 3: Agregar productos al carrito y verificar contenido."""
+    logger.info("--- INICIANDO PRUEBA: test_agregar_al_carrito ---")
+    pagina_login = PaginaLogin(driver)
+    pagina_inventario = PaginaInventario(driver)
+    pagina_carrito = PaginaCarrito(driver)
     
-    logger.info(f"Navigating to {data['url']} and logging in")
-    driver.get(data["url"])
-    login_page.login(data["valid_user"]["username"], data["valid_user"]["password"])
+    logger.info(f"Navegando a {datos['url']} e iniciando sesión")
+    driver.get(datos["url"])
+    pagina_login.iniciar_sesion(datos["valid_user"]["username"], datos["valid_user"]["password"])
     
-    logger.info("Adding 'Sauce Labs Backpack' to cart")
-    inventory_page.add_product_to_cart("Sauce Labs Backpack")
-    logger.info("Adding 'Sauce Labs Bike Light' to cart")
-    inventory_page.add_product_to_cart("Sauce Labs Bike Light")
+    logger.info("Agregando 'Sauce Labs Backpack' al carrito")
+    pagina_inventario.agregar_producto_al_carrito("Sauce Labs Backpack")
+    logger.info("Agregando 'Sauce Labs Bike Light' al carrito")
+    pagina_inventario.agregar_producto_al_carrito("Sauce Labs Bike Light")
     
-    logger.info("Verifying shopping cart badge counts 2 items")
-    assert inventory_page.get_cart_badge_count() == 2
+    logger.info("Verificando que la insignia del carrito de compras cuente 2 artículos")
+    assert pagina_inventario.obtener_cantidad_insignia_carrito() == 2
     
-    logger.info("Navigating to shopping cart page")
-    inventory_page.go_to_cart()
-    cart_items = cart_page.get_cart_item_names()
+    logger.info("Navegando a la página del carrito de compras")
+    pagina_inventario.ir_al_carrito()
+    articulos_carrito = pagina_carrito.obtener_nombres_items_carrito()
     
-    logger.info("Verifying products exist inside shopping cart list")
-    assert "Sauce Labs Backpack" in cart_items
-    assert "Sauce Labs Bike Light" in cart_items
-    logger.info("--- TEST PASSED: test_add_to_cart ---")
+    logger.info("Verificando que los productos existan dentro de la lista del carrito de compras")
+    assert "Sauce Labs Backpack" in articulos_carrito
+    assert "Sauce Labs Bike Light" in articulos_carrito
+    logger.info("--- PRUEBA EXITOSA: test_agregar_al_carrito ---")
 
-def test_remove_from_cart(driver):
-    """Test 4: Remover producto del carrito y verificar que quede vacio."""
-    logger.info("--- STARTING TEST: test_remove_from_cart ---")
-    login_page = LoginPage(driver)
-    inventory_page = InventoryPage(driver)
-    cart_page = CartPage(driver)
+def test_eliminar_del_carrito(driver):
+    """Prueba 4: Eliminar producto del carrito y verificar que quede vacío."""
+    logger.info("--- INICIANDO PRUEBA: test_eliminar_del_carrito ---")
+    pagina_login = PaginaLogin(driver)
+    pagina_inventario = PaginaInventario(driver)
+    pagina_carrito = PaginaCarrito(driver)
     
-    logger.info(f"Navigating to {data['url']} and logging in")
-    driver.get(data["url"])
-    login_page.login(data["valid_user"]["username"], data["valid_user"]["password"])
+    logger.info(f"Navegando a {datos['url']} e iniciando sesión")
+    driver.get(datos["url"])
+    pagina_login.iniciar_sesion(datos["valid_user"]["username"], datos["valid_user"]["password"])
     
-    logger.info("Adding 'Sauce Labs Backpack' to cart")
-    inventory_page.add_product_to_cart("Sauce Labs Backpack")
-    assert inventory_page.get_cart_badge_count() == 1
+    logger.info("Agregando 'Sauce Labs Backpack' al carrito")
+    pagina_inventario.agregar_producto_al_carrito("Sauce Labs Backpack")
+    assert pagina_inventario.obtener_cantidad_insignia_carrito() == 1
     
-    logger.info("Navigating to cart and removing product")
-    inventory_page.go_to_cart()
-    cart_page.remove_product_from_cart("Sauce Labs Backpack")
+    logger.info("Navegando al carrito y eliminando el producto")
+    pagina_inventario.ir_al_carrito()
+    pagina_carrito.eliminar_producto_del_carrito("Sauce Labs Backpack")
     
-    logger.info("Verifying cart contains 0 items and badge is cleared")
-    assert len(cart_page.get_cart_item_names()) == 0
-    assert inventory_page.get_cart_badge_count() == 0
-    logger.info("--- TEST PASSED: test_remove_from_cart ---")
+    logger.info("Verificando que el carrito contenga 0 artículos y la insignia se haya limpiado")
+    assert len(pagina_carrito.obtener_nombres_items_carrito()) == 0
+    assert pagina_inventario.obtener_cantidad_insignia_carrito() == 0
+    logger.info("--- PRUEBA EXITOSA: test_eliminar_del_carrito ---")
 
-def test_checkout_complete(driver):
-    """Test 5: Flujo completo de compra (E2E) con checkout exitoso."""
-    logger.info("--- STARTING TEST: test_checkout_complete ---")
-    login_page = LoginPage(driver)
-    inventory_page = InventoryPage(driver)
-    cart_page = CartPage(driver)
-    checkout_page = CheckoutPage(driver)
+def test_checkout_completo(driver):
+    """Prueba 5: Flujo completo de compra (E2E) con checkout exitoso."""
+    logger.info("--- INICIANDO PRUEBA: test_checkout_completo ---")
+    pagina_login = PaginaLogin(driver)
+    pagina_inventario = PaginaInventario(driver)
+    pagina_carrito = PaginaCarrito(driver)
+    pagina_checkout = PaginaCheckout(driver)
     
-    logger.info(f"Navigating to {data['url']} and logging in")
-    driver.get(data["url"])
-    login_page.login(data["valid_user"]["username"], data["valid_user"]["password"])
+    logger.info(f"Navegando a {datos['url']} e iniciando sesión")
+    driver.get(datos["url"])
+    pagina_login.iniciar_sesion(datos["valid_user"]["username"], datos["valid_user"]["password"])
     
-    logger.info("Adding 'Sauce Labs Backpack' to cart")
-    inventory_page.add_product_to_cart("Sauce Labs Backpack")
+    logger.info("Agregando 'Sauce Labs Backpack' al carrito")
+    pagina_inventario.agregar_producto_al_carrito("Sauce Labs Backpack")
     
-    logger.info("Proceeding to checkout form")
-    inventory_page.go_to_cart()
-    cart_page.go_to_checkout()
+    logger.info("Procediendo al formulario de pago (checkout)")
+    pagina_inventario.ir_al_carrito()
+    pagina_carrito.ir_a_checkout()
     
-    info = data["checkout_info"]
-    logger.info(f"Filling checkout info: First Name='{info['first_name']}', Last Name='{info['last_name']}', Postal Code='{info['postal_code']}'")
-    checkout_page.fill_checkout_info(info["first_name"], info["last_name"], info["postal_code"])
+    info = datos["checkout_info"]
+    logger.info(f"Completando información de pago: Nombre='{info['first_name']}', Apellido='{info['last_name']}', Código Postal='{info['postal_code']}'")
+    pagina_checkout.completar_info_checkout(info["first_name"], info["last_name"], info["postal_code"])
     
-    logger.info("Finishing purchase overview step")
-    checkout_page.finish_checkout()
+    logger.info("Finalizando el paso de resumen de compra")
+    pagina_checkout.finalizar_checkout()
     
-    logger.info("Verifying checkout order completion header text")
-    success_text = checkout_page.get_complete_header_text()
-    assert "Thank you for your order!" in success_text
-    logger.info("--- TEST PASSED: test_checkout_complete ---")
+    logger.info("Verificando el texto del encabezado de finalización del pedido de checkout")
+    texto_exito = pagina_checkout.obtener_texto_encabezado_completo()
+    assert "Thank you for your order!" in texto_exito
+    logger.info("--- PRUEBA EXITOSA: test_checkout_completo ---")
