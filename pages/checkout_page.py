@@ -16,7 +16,7 @@ class CheckoutPage(BasePage):
         self.send_keys(self.first_name_input, first_name)
         self.send_keys(self.last_name_input, last_name)
         self.send_keys(self.postal_code_input, postal_code)
-        self.js_click(self.continue_button)
+        self.click(self.continue_button)
 
     def finish_checkout(self):
         """Clicks the finish button on the overview page."""

@@ -8,9 +8,9 @@ class CartPage(BasePage):
         self.cart_item_name = (By.CSS_SELECTOR, ".inventory_item_name")
 
     def get_cart_item_names(self):
-        """Retrieves names of all products currently in the cart."""
+        """Retrieves names of all products currently in the cart without waiting."""
         try:
-            elements = self.find_elements(self.cart_item_name)
+            elements = self.driver.find_elements(*self.cart_item_name)
             return [el.text for el in elements]
         except Exception:
             return []
@@ -18,7 +18,7 @@ class CartPage(BasePage):
     def remove_product_from_cart(self, product_name):
         """Removes a specific product from the cart by its name and waits for it to disappear."""
         btn_xpath = f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']/ancestor::div[contains(@class, 'cart_item')]//button"
-        self.js_click((By.XPATH, btn_xpath))
+        self.click((By.XPATH, btn_xpath))
         
         # Wait until the removed item is no longer present/visible in the DOM
         from selenium.webdriver.support import expected_conditions as EC
@@ -27,4 +27,4 @@ class CartPage(BasePage):
 
     def go_to_checkout(self):
         """Clicks the checkout button to proceed to the checkout form."""
-        self.js_click(self.checkout_button)
+        self.click(self.checkout_button)

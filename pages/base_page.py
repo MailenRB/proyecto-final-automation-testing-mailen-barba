@@ -49,12 +49,14 @@ class BasePage:
         return text
 
     def is_displayed(self, locator):
-        """Checks if an element is visible on the page."""
+        """Checks if an element is visible on the page without waiting."""
         try:
-            element = self.find_element(locator)
-            visible = element.is_displayed()
-            self.logger.debug(f"Element {locator} visibility state: {visible}")
-            return visible
+            elements = self.driver.find_elements(*locator)
+            if elements:
+                visible = elements[0].is_displayed()
+                self.logger.debug(f"Element {locator} visibility state: {visible}")
+                return visible
+            return False
         except Exception:
             self.logger.debug(f"Element {locator} is not visible or not found")
             return False
